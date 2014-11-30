@@ -200,11 +200,13 @@
 		  
 		  </div>
 		  
-		  <h3 id="meeting">Member Management</h3> 		  
+		  <h3 id="meeting">Member Area</h3> 		  
 		  <div>
 		  
 		  <ul class="nav nav-sidebar">
-		  <?php
+		  
+		  
+			<?php
 				if($page=='AddUser'){
 					echo "<li class='active'>";
 				}
@@ -223,7 +225,46 @@
 					}
 				}
 			?>
-			</a></li>	
+			</a></li>
+			<?php
+				if($page=='Speech'){
+					echo "<li class='active'>";
+				}
+				else{
+					echo "<li>";
+				}				
+			?>
+			<a href="?page=Speech">Do a Speech!</a></li>
+			<?php
+				if($page=='Evaluator'){
+					echo "<li class='active'>";
+				}
+				else{
+					echo "<li>";
+				}				
+			?>
+			<a href="?page=Evaluator">Be an Evaluator!</a></li>
+			<?php
+				if($page=='Progress'){
+					echo "<li class='active'>";
+				}
+				else{
+					echo "<li>";
+				}				
+			?>
+			<a href="?page=Progress">Update Member Progress
+			<?php
+				if(!isset($_SESSION['Name'])){
+					echo '<span class="glyphicon glyphicon-lock"></span>';
+				}
+				else if(isset($_SESSION['Level'])){
+					if($_SESSION['Level']<1){
+						echo '<span class="glyphicon glyphicon-lock"></span>';
+					}
+				}
+			?>
+			</a></li>
+			
 		  </ul>
 		  
 		  </div>
@@ -666,14 +707,17 @@
 			}
 			else if($page=='Evaluator') //UI to Volenteer for a speech evaluator
 			{
+				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Volenteer to be a speech evaluator</h2><br>';
 			}
 			else if($page=='Speech') //UI to Volenteer to do a speech
 			{
+				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Volenteer to do a speech</h2><br>';
 			}
-			else if($page=='progress') //UI to update member progress
+			else if($page=='Progress') //UI to update member progress
 			{
+				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Update member progress</h2><br>';
 			}
 			
