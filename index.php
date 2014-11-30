@@ -689,7 +689,8 @@
 			{
 				if(isset($_SESSION['Level'])){				
 						global $MeetingID;
-						$MeetingID=1;
+						//$MeetingID=1;
+						getNewMeetingID();
 						$mode=0;//Note: In the final system this will be "$_SESSION['Level']" So that only admins will get the power not only to volentter but also to edit other aspects. But since Chris needs to see all the funtionality with one login, I am disabling that option here. 
 												
 						if($mode==1){
@@ -720,6 +721,11 @@
 				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Update member progress</h2><br>';
 			}
+			else if($page=='UpdateMeeting') //UI to update member progress
+			{
+				echo '<script type="text/javascript">panelIndex=2;</script>';
+				echo '<h2 class="sub-header">Update member progress</h2><br>';
+			}
 			
 			function CryptPass($passW){
 				global $key1,$key2;
@@ -728,25 +734,78 @@
 				return $pass;
 			}
 			
+			
+			function getNewMeetingID(){
+				global $MeetingID,$con; //Refer to the global variables
+				
+				$sql="SELECT Max(`meeting_index`) AS m FROM `toastmastersdb`.`tt_meeting`";			
+					
+												
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+				while($row = mysqli_fetch_array($result))
+				{					
+					$MeetingID=intval($row['m']);
+				}	
+				
+				
+			}
+			
 			function ShowMeetingtForm($mode){
-				global $MeetingID; //Refer to the global variables			
+				global $MeetingID,$con; //Refer to the global variables
+
+						$date=date('m-j-Y');
+						$com="";
+						$tm="";
+						$tt="";
+						$vc="";
+						$ti="";
+						$gr="";
+						$ge="";
+						$ac="";
+						$sp="";
+						
+						if($MeetingID>0){
+							$sql="SELECT * FROM `toastmastersdb`.`tt_meeting`";
+							$result =mysqli_query($con,$sql);
+							if (!$result) {
+								die('Error: ' . mysqli_error($con));
+							}
+							while($row = mysqli_fetch_array($result))
+							{		
+								$date=$row['date'];
+								$com=$row['comment'];
+								$tm=$row['toastmaster'];
+								$tt=$row['tableTopicsMaster'];
+								$vc=$row['voteCounter'];
+								$ti=$row['timer'];
+								$gr=$row['gramarian'];
+								$ge=$row['generalEvaluator'];
+								$ac=$row['ahCounter'];
+								$sp=$row['numberOfSpeechSlots'];
+							}	
+						}
+						
+				
 						echo '<script type="text/javascript">panelIndex=1;</script>';						
 						echo '<form action="." method="get">';
 						echo '<table width="100%" border="0" ><tr><td width="15%" ><div class="extra">';
 						echo '<input type="hidden" class="form-control" value="UpdateMeeting" name="page">';						
 						echo '<label for="date">Date : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input id="date" class="datepicker form-control" data-date-format="mm/dd/yyyy" name="date" required';
+						echo '<input id="date" class="datepicker form-control" data-date-format="mm/dd/yyyy" name="date" value="'.$date.'" required';
 						if($mode>=1){
 							echo '>';
 						}
 						else{
 							echo ' disabled>';
 						}
-						echo '</td><td td width="15%" ><div class="extra">';
+						echo '</input></td><td td width="15%" ><div class="extra">';
 						echo '<br><label for="numberOfSpeechSlots">Speech Slots : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="numberOfSpeechSlots" name="numberOfSpeechSlots"';
+						echo '<input type="text" class="form-control" id="numberOfSpeechSlots" name="numberOfSpeechSlots" value="'.$sp.'"';
 						if($mode>=1){
 							echo '>';
 						}
@@ -763,37 +822,37 @@
 						else{
 							echo ' disabled>';
 						}
-						echo '</textarea>';
+						echo $com.'</textarea>';
 						echo '</td></tr><tr><td td colspan=4>';
 						echo '<br><hr><h4>Meeting Roles</h4>';
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="toastmaster">Toastmaster : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="toastmaster" name="toastmaster">';
+						echo '<input type="text" class="form-control" id="toastmaster" name="toastmaster" value="'.$tm.'">';
 						echo '</td><td td width="15%"><div class="extra">';
 						echo '<br><label for="tableTopicsMaster">TableTopics Master : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="tableTopicsMaster" name="tableTopicsMaster" >';
+						echo '<input type="text" class="form-control" id="tableTopicsMaster" name="tableTopicsMaster" value="'.$tt.'">';
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="voteCounter">Vote Counter : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="voteCounter" name="voteCounter">';
+						echo '<input type="text" class="form-control" id="voteCounter" name="voteCounter" value="'.$vc.'">';
 						echo '</td><td td width="15%"><div class="extra">';
 						echo '<br><label for="timer">Timer : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="timer" name="timer" >';
+						echo '<input type="text" class="form-control" id="timer" name="timer" value="'.$tm.'">';
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="gramarian">Gramarian : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="gramarian" name="gramarian">';
+						echo '<input type="text" class="form-control" id="gramarian" name="gramarian" value="'.$gr.'">';
 						echo '</td><td td width="15%"><div class="extra">';
 						echo '<br><label for="generalEvaluator">General Evaluator : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="generalEvaluator" name="generalEvaluator" >';		
+						echo '<input type="text" class="form-control" id="generalEvaluator" name="generalEvaluator" value="'.$ge.'">';		
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="ahCounter">Ah Counter : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="ahCounter" name="ahCounter">';
+						echo '<input type="text" class="form-control" id="ahCounter" name="ahCounter" value="'.$ac.'">';
 						echo '</td><td td width="15%">';
 						echo '<br>';
 						echo '</td><td td width="35%">';												
@@ -807,6 +866,9 @@
 						}
 						echo '</button> </form>';
 			}
+			
+			
+			
 			
 			
 			function ShowInputForm(){
