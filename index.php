@@ -79,7 +79,8 @@
 	<div class="container-fluid">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
+          <br><b>Table Topics Repository</b><hr>
+		  <ul class="nav nav-sidebar">			
 		    <?php
 				if($page=='Random'){
 					echo "<li class='active'>";
@@ -147,8 +148,9 @@
 					}
 				}
 			?>
-			</a></li>
-          </ul>          
+			</a></li>			
+          </ul>
+          
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <?php
@@ -216,6 +218,7 @@
 							if($pass==$row['Password']){
 								$_SESSION['Name']=$row['Name'];
 								$_SESSION['Level']=$row['Level'];
+								$_SESSION['Index']=$row['Index'];
 								if($_POST["Redirect"]!=""){
 									$params = explode("page=Login&Next=",(string)$_POST["Redirect"]);
 									header( "Location: ./?page=".$params[1]);
@@ -325,7 +328,7 @@
 			else if($page=='Add'){ //Ui for Add
 				if(isset($_SESSION['Level'])){
 					echo '<h2 class="sub-header">Adding New Topic</h2><br>';
-					ShowInputForm();
+					ShowInputForm();					
 				}
 				else{
 					$params = explode("page=",(string)$_SERVER['QUERY_STRING']);
@@ -360,7 +363,7 @@
 						else{  //There is no id i.e this is an add 
 						
 							//Add the topic
-							$sql="INSERT INTO tt_title (`Topic`) VALUES ('".$Title."')";
+							$sql="INSERT INTO tt_title (`Topic`,`Added by`) VALUES ('".$Title."',".$_SESSION['Index'].")";
 							if (!mysqli_query($con,$sql)) {
 								die('Error: ' . mysqli_error($con));
 							}
