@@ -17,13 +17,20 @@
 		.form-signin {
 		  max-width: 400px;		 
 		}
+		
+		.extra{
+			padding: 10px;
+			
+		}
 	</style>
 	
 	
 </head>
 
 <body>
-
+<script type="text/javascript"> 
+	panelIndex=0;
+</script>
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -139,6 +146,58 @@
 		  
 		  <h3 id="meeting">Meeting Management</h3> 		  
 		  <div>
+			
+			<ul class="nav nav-sidebar">
+			
+			<?php
+				if($page=='AddMeeting'){
+					echo "<li class='active'>";
+				}
+				else{
+					echo "<li>";
+				}				
+			?>
+			<a href="?page=AddMeeting">Add Meeting
+			<?php
+				if(!isset($_SESSION['Name'])){
+					echo '<span class="glyphicon glyphicon-lock"></span>';
+				}
+				else if(isset($_SESSION['Level'])){
+					if($_SESSION['Level']<1){
+						echo '<span class="glyphicon glyphicon-lock"></span>';
+					}
+				}
+			?>
+			</a></li>
+
+			<?php
+				if($page=='EditMeeting'){
+					echo "<li class='active'>";
+				}
+				else{
+					echo "<li>";
+				}				
+			?>
+			<a href="?page=EditMeeting">
+			<?php
+				//Note: In the final system this section will be uncommented so that admins will get the power not only to volentter but also to edit other aspects. But since Chris needs to see all the funtionality with one login, I am disabling that option here.
+				
+			//	if(isset($_SESSION['Level']) && $_SESSION['Level']>0){					
+			//		echo 'Edit Meeting';					
+			//	}
+			//	else{
+					echo 'Register for Role';
+			//	}
+				
+				if(!isset($_SESSION['Name'])){
+					echo '<span class="glyphicon glyphicon-lock"></span>';
+				}
+			?>
+			</a></li>
+
+			
+		  </ul>
+		  
 		  </div>
 		  
 		  <h3 id="meeting">Member Management</h3> 		  
@@ -196,6 +255,7 @@
 			$TitleID=0;
 			$Title="";
 			$keys=array();
+			$MeetingID=0;
 			
 			
 			if($page=='Login'){	//User interface for logging in	
@@ -274,6 +334,7 @@
 				}						
 			}
 			else if($page=='Random'){
+				echo '<script type="text/javascript">panelIndex=0;</script>';
 				$TitleID=array_rand($topics, 1);				
 				FetchTitle($TitleID,$topics,$con);
 								
@@ -283,6 +344,7 @@
 				
 			}
 			else if($page=='Search'){
+				echo '<script type="text/javascript">panelIndex=0;</script>';
 				$sql="SELECT DISTINCT`tt_title`.`Topic`,`tt_title`.`Index` FROM tt_title,(SELECT `tt_title_to_key`.`Title` FROM tt_title_to_key,tt_key WHERE `tt_title_to_key`.`Key` =`tt_key`.`Index`";
 					
 				if (isset($_GET["q"]))
@@ -311,7 +373,7 @@
 				echo '</div>';
 				echo '</div>';
 			}
-			else if($page=='Edit'){ //Ui for Edit
+			else if($page=='Edit'){ //Ui for Edit				
 				if(isset($_SESSION['Level'])){					
 						if (isset($_GET["id"]))
 						{
@@ -322,7 +384,8 @@
 							else if($TitleID>=count($topics)){
 								$TitleID=count($topics)-1;
 							}	
-							FetchTitle($TitleID,$topics,$con);	
+							FetchTitle($TitleID,$topics,$con);
+							echo '<script type="text/javascript">panelIndex=0;</script>';
 							echo '<h2 class="sub-header"><a href="?page=Edit&id='.($TitleID-1).'"><button type="button" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-backward"></span></button></a> ';
 							echo 'Editing Topic Number '.$TitleID.' ';
 							echo '<a href="?page=Edit&id='.($TitleID+1).'"><button type="button" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-forward"></span></button></a></h2><br>';
@@ -347,6 +410,7 @@
 			}
 			else if($page=='Add'){ //Ui for Add
 				if(isset($_SESSION['Level'])){
+					echo '<script type="text/javascript">panelIndex=0;</script>';
 					echo '<h2 class="sub-header">Adding New Topic</h2><br>';
 					ShowInputForm();					
 				}
@@ -355,7 +419,7 @@
 					header( "Location: ./?page=Login&Next=".$params[1]);
 				}
 			}
-			else if($page=='Update'){  //Handles the DB operation of both Edit and Add requests
+			else if($page=='Update'){  //Handles the DB operation of both Edit and Add requests				
 				if(isset($_SESSION['Level'])){ 
 					if ((isset($_GET["topic"]))&&(isset($_GET["keys"])))
 					{
@@ -469,6 +533,7 @@
 			{
 				if(isset($_SESSION['Level'])){
 					if($_SESSION['Level']==1){
+						echo '<script type="text/javascript">panelIndex=2;</script>';
 						if(isset($_GET["PWMM"])){
 							echo '<div class="alert alert-danger alert-dismissable">';
 							echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
@@ -558,6 +623,59 @@
 					header( "Location: ./?page=Login&Next=".$params[1]);
 				}				
 			}
+			else if($page=='AddMeeting') //UI to add meeting
+			{
+				if(isset($_SESSION['Level'])){
+					if($_SESSION['Level']==1){
+						global $MeetingID;
+						$MeetingID=0;
+						echo '<h2 class="sub-header">Adding a New Meeting</h2><br>';
+						ShowMeetingtForm($_SESSION['Level']);						
+					}
+					else{
+						echo '<div class="alert alert-warning alert-dismissable">';
+						echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+						echo 'You do not have admin powers!';
+						echo '</div>';
+					}
+				}
+				else{					
+					$params = explode("page=",(string)$_SERVER['QUERY_STRING']);
+					header( "Location: ./?page=Login&Next=".$params[1]);
+				}
+			}
+			else if($page=='EditMeeting') //UI to edit meeting
+			{
+				if(isset($_SESSION['Level'])){				
+						global $MeetingID;
+						$MeetingID=1;
+						$mode=0;//Note: In the final system this will be "$_SESSION['Level']" So that only admins will get the power not only to volentter but also to edit other aspects. But since Chris needs to see all the funtionality with one login, I am disabling that option here. 
+												
+						if($mode==1){
+							echo '<h2 class="sub-header">Editing the next Meeting</h2><br>';
+						}
+						else{
+							echo '<h2 class="sub-header">Volunteering for a role</h2><br>';
+						}
+						ShowMeetingtForm($mode);  
+				}
+				else{					
+					$params = explode("page=",(string)$_SERVER['QUERY_STRING']);
+					header( "Location: ./?page=Login&Next=".$params[1]);
+				}
+			}
+			else if($page=='Evaluator') //UI to Volenteer for a speech evaluator
+			{
+				echo '<h2 class="sub-header">Volenteer to be a speech evaluator</h2><br>';
+			}
+			else if($page=='Speech') //UI to Volenteer to do a speech
+			{
+				echo '<h2 class="sub-header">Volenteer to do a speech</h2><br>';
+			}
+			else if($page=='progress') //UI to update member progress
+			{
+				echo '<h2 class="sub-header">Update member progress</h2><br>';
+			}
 			
 			function CryptPass($passW){
 				global $key1,$key2;
@@ -565,6 +683,87 @@
 				$pass=crypt($passW, $hashed_password);
 				return $pass;
 			}
+			
+			function ShowMeetingtForm($mode){
+				global $MeetingID; //Refer to the global variables			
+						echo '<script type="text/javascript">panelIndex=1;</script>';						
+						echo '<form action="." method="get">';
+						echo '<table width="100%" border="0" ><tr><td width="15%" ><div class="extra">';
+						echo '<input type="hidden" class="form-control" value="UpdateMeeting" name="page">';						
+						echo '<label for="date">Date : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input id="date" class="datepicker form-control" data-date-format="mm/dd/yyyy" name="date" required';
+						if($mode>=1){
+							echo '>';
+						}
+						else{
+							echo ' disabled>';
+						}
+						echo '</td><td td width="15%" ><div class="extra">';
+						echo '<br><label for="numberOfSpeechSlots">Speech Slots : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="numberOfSpeechSlots" name="numberOfSpeechSlots"';
+						if($mode>=1){
+							echo '>';
+						}
+						else{
+							echo ' disabled>';
+						}
+						echo '</td></tr><tr><td td width="15%"><div class="extra">';
+						echo '<br><label for="comment">Comments : </label></div>';
+						echo '</td><td td width="85%" colspan=3>';
+						echo '<textarea class="form-control" rows="4" id="comment" name="comment"';
+						if($mode>=1){
+							echo '>';
+						}
+						else{
+							echo ' disabled>';
+						}
+						echo '</textarea>';
+						echo '</td></tr><tr><td td colspan=4>';
+						echo '<br><hr><h4>Meeting Roles</h4>';
+						echo '</td></tr><tr><td td width="15%"><div class="extra">';
+						echo '<br><label for="toastmaster">Toastmaster : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="toastmaster" name="toastmaster">';
+						echo '</td><td td width="15%"><div class="extra">';
+						echo '<br><label for="tableTopicsMaster">TableTopics Master : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="tableTopicsMaster" name="tableTopicsMaster" >';
+						echo '</td></tr><tr><td td width="15%"><div class="extra">';
+						echo '<br><label for="voteCounter">Vote Counter : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="voteCounter" name="voteCounter">';
+						echo '</td><td td width="15%"><div class="extra">';
+						echo '<br><label for="timer">Timer : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="timer" name="timer" >';
+						echo '</td></tr><tr><td td width="15%"><div class="extra">';
+						echo '<br><label for="gramarian">Gramarian : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="gramarian" name="gramarian">';
+						echo '</td><td td width="15%"><div class="extra">';
+						echo '<br><label for="generalEvaluator">General Evaluator : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="generalEvaluator" name="generalEvaluator" >';		
+						echo '</td></tr><tr><td td width="15%"><div class="extra">';
+						echo '<br><label for="ahCounter">Ah Counter : </label></div>';
+						echo '</td><td td width="35%">';
+						echo '<input type="text" class="form-control" id="ahCounter" name="ahCounter">';
+						echo '</td><td td width="15%">';
+						echo '<br>';
+						echo '</td><td td width="35%">';												
+						echo '</td></tr></table><hr>';
+						echo '<button type="submit" class="btn btn-success btn-lg"><span class="glyphicon glyphicon-ok-circle"></span> ';
+						if($MeetingID>0){
+							echo 'Update';
+						}
+						else{
+							echo 'Add';
+						}
+						echo '</button> </form>';
+			}
+			
 			
 			function ShowInputForm(){
 				global $Title,$keys,$TitleID; //Refer to the global variables
@@ -690,12 +889,19 @@
 		$( "#TMM" ).accordion(
 		{
 			collapsible: true,
-			//active: tlaIndex,
+			active: panelIndex,
 			heightStyle: "content"
 
 		
-		}
+		}	
+		
 		); 
+		
+		
+		$('.datepicker').datepicker({
+			startDate: '-3d'
+		});
+		
 	});
 </script>
 </body>
