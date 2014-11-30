@@ -79,7 +79,11 @@
 	<div class="container-fluid">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
-          <br><b>Table Topics Repository</b><hr>
+          
+		  <div id="TMM">
+		  <h3 id="tt">Table Topics</h3> 		  
+		  <div>
+		  
 		  <ul class="nav nav-sidebar">			
 		    <?php
 				if($page=='Random'){
@@ -128,8 +132,20 @@
 					echo '<span class="glyphicon glyphicon-lock"></span>';
 				}
 			?>
-			</a></li>            
-			<?php
+			</a></li>   
+          </ul>
+		  </div>
+		  
+		  
+		  <h3 id="meeting">Meeting Management</h3> 		  
+		  <div>
+		  </div>
+		  
+		  <h3 id="meeting">Member Management</h3> 		  
+		  <div>
+		  
+		  <ul class="nav nav-sidebar">
+		  <?php
 				if($page=='AddUser'){
 					echo "<li class='active'>";
 				}
@@ -148,9 +164,13 @@
 					}
 				}
 			?>
-			</a></li>			
-          </ul>
-          
+			</a></li>	
+		  </ul>
+		  
+		  </div>
+		  
+		  </div>
+		  
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <?php
@@ -652,11 +672,30 @@
       </div>
     </div>
 	
+	
+
+	
+	
 <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" /> 
+	<script type="text/javascript" src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>	
     <script src="./bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
     <script src="./bootstrap-3.1.1-dist/js/docs.min.js"></script>
-	
+	<script type="text/javascript">
+ 	$(function() {		
+		
+		$( "#TMM" ).accordion(
+		{
+			collapsible: true,
+			//active: tlaIndex,
+			heightStyle: "content"
+
+		
+		}
+		); 
+	});
+</script>
 </body>
