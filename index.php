@@ -887,6 +887,21 @@
 					echo '</div>';
 				}
 			}
+			else if($page=='ClaimEvaluatorSlot'){
+				global $MeetingID,$con;
+				getNewMeetingID();
+				echo '<script type="text/javascript">panelIndex=2;</script>';
+				$sql="UPDATE tt_speech SET `evalIndex`=".$_SESSION['Index']." WHERE `meetingIndex`=".$MeetingID." AND `memberIndex`=".$_GET["memberIndex"];
+				if (!mysqli_query($con,$sql)) {
+					die('Error: ' . mysqli_error($con));
+				}
+				else{				
+					echo '<div class="alert alert-success alert-dismissable">';
+					echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+					echo 'Evaluator slot claimed!';
+					echo '</div>';
+				}
+			}
 			
 			function CryptPass($passW){
 				global $key1,$key2;
