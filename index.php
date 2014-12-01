@@ -715,6 +715,63 @@
 			{
 				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Volenteer to do a speech</h2><br>';
+				
+				global $MeetingID;
+				getNewMeetingID();
+				
+				$claimedCount=0;
+				$sql="SELECT * FROM `toastmastersdb`.`tt_speech` WHERE `meetingIndex`=".$MeetingID;			
+																	
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+								
+				while($row = mysqli_fetch_array($result))
+				{					
+					//$MeetingID=intval($row['m']);
+					$claimedCount++;
+				}
+				
+				$sql="SELECT `numberOfSpeechSlots` AS c FROM `toastmastersdb`.`tt_meeting` WHERE `meeting_index`=".$MeetingID;			
+																	
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+				
+				if($row = mysqli_fetch_array($result))
+				{						
+					if((intval($row['c'])-$claimedCount)>0)
+					{
+						echo '<form action="." method="get">';
+						echo '<table width="100%" border="0" ><tr><td width="15%" ><div class="extra">';
+						echo '<input type="hidden" class="form-control" value="ClaimSpeechSlot" name="page">';						
+						echo '<label for="date">Manual Name : </label></div>';
+						echo '</td><td td width="85%">';
+						echo '<input type="text" class="form-control" name="manualName" required>';
+						echo '</td></tr><tr><td width="15%" ><div class="extra">';
+						echo '<label for="date">Project Number : </label></div>';
+						echo '</td><td td width="85%">';
+						echo '<select class="form-control" name="projectNum" required>';
+						for ($x = 1; $x <= 10; $x++) {
+							echo '<option value='.$x.' >'.$x.'</option>';
+						}
+						echo '</select>';
+						echo '</td></tr></table>';
+						echo '<button type="submit" class="btn btn-success btn-lg"><span class="glyphicon glyphicon-ok-circle"></span> ';						
+						echo 'Claim Slot!';						
+						echo '</button> </form>';							
+					}
+					else{
+						echo '<div class="alert alert-warning alert-dismissable">';
+						echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+						echo 'Sorry. No speech slots available, try next meeting!';
+						echo '</div>';
+					}
+					
+				}
+				
 			}
 			else if($page=='Progress') //UI to update member progress
 			{
@@ -747,7 +804,7 @@
 								die('Error: ' . mysqli_error($con));
 							}
 							else{
-							echo '<script type="text/javascript">panelIndex=1;</script>';
+								echo '<script type="text/javascript">panelIndex=1;</script>';
 								echo '<div class="alert alert-success alert-dismissable">';
 								echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
 								echo 'Meeting '.$MeetingID.' updated!';
@@ -761,6 +818,14 @@
 					echo 'You have to be a member to edit meeting roles!';
 					echo '</div>';
 				}
+			}
+			else if($page=='ClaimSpeechSlot') //Business logic to Claim a SpeechSlot
+			{
+				echo '<script type="text/javascript">panelIndex=2;</script>';
+				echo '<div class="alert alert-success alert-dismissable">';
+				echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+				echo 'Slots available';
+				echo '</div>';
 			}
 			
 			function CryptPass($passW){
