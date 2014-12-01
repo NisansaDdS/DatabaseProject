@@ -729,7 +729,7 @@
 								
 				while($row = mysqli_fetch_array($result))
 				{					
-					//$MeetingID=intval($row['m']);
+					//$MeetingID=intval($row['m']);  //Check if perviously claimed!!!!
 					$claimedCount++;
 				}
 				
@@ -821,11 +821,30 @@
 			}
 			else if($page=='ClaimSpeechSlot') //Business logic to Claim a SpeechSlot
 			{
+				global $MeetingID,$con;
+				getNewMeetingID();
+			
 				echo '<script type="text/javascript">panelIndex=2;</script>';
-				echo '<div class="alert alert-success alert-dismissable">';
-				echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-				echo 'Slots available';
-				echo '</div>';
+				$sql="INSERT INTO tt_speech (`meetingIndex`,`memberIndex`,`manualName`,`projectNum`) VALUES (".$MeetingID.",".$_SESSION['Index'].",'".$_GET["manualName"]."',".intval ($_GET["projectNum"]).")";
+				if (!mysqli_query($con,$sql)) {
+					//die('Error: ' .mysqli_errno($con).' '. mysqli_error($con));
+					if(mysqli_errno($con)==1062)
+					{
+						echo '<div class="alert alert-warning alert-dismissable">';
+						echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+						echo 'You have already claimed a Speech slot in this meeting. Cannot Add twice!';
+						echo '</div>';
+					}
+					else{
+						die();
+					}					
+				}	
+				else{				
+					echo '<div class="alert alert-success alert-dismissable">';
+					echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+					echo 'Speeech slot claimed!';
+					echo '</div>';
+				}
 			}
 			
 			function CryptPass($passW){
