@@ -690,7 +690,7 @@
 				if(isset($_SESSION['Level'])){				
 						global $MeetingID;
 						//$MeetingID=1;
-						getNewMeetingID();
+						getNewMeetingID();						
 						$mode=0;//Note: In the final system this will be "$_SESSION['Level']" So that only admins will get the power not only to volentter but also to edit other aspects. But since Chris needs to see all the funtionality with one login, I am disabling that option here. 
 												
 						if($mode==1){
@@ -721,10 +721,46 @@
 				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Update member progress</h2><br>';
 			}
-			else if($page=='UpdateMeeting') //UI to update member progress
+			else if($page=='UpdateMeeting') //Business logic to add/update meeting
 			{
-				echo '<script type="text/javascript">panelIndex=2;</script>';
-				echo '<h2 class="sub-header">Update member progress</h2><br>';
+				if(isset($_SESSION['Level'])){
+					echo '<script type="text/javascript">panelIndex=2;</script>';					
+					if(isset($_GET["date"])){ //This is an add													
+							$sql="INSERT INTO tt_meeting (`date`,`comment`,`toastmaster`,`tableTopicsMaster`,`voteCounter`,`timer`,`gramarian`,`generalEvaluator`,`ahCounter`,`numberOfSpeechSlots`) VALUES (STR_TO_DATE('".$_GET["date"]."', '%m-%d-%Y'),'".$_GET["comment"]."',".$_GET["toastmaster"].",".$_GET["tableTopicsMaster"].",".$_GET["voteCounter"].",".$_GET["timer"].",".$_GET["gramarian"].",".$_GET["generalEvaluator"].",".$_GET["ahCounter"].",".$_GET["numberOfSpeechSlots"].")";
+							if (!mysqli_query($con,$sql)) {
+								die('Error: ' . mysqli_error($con));
+							}
+							else{
+								echo '<script type="text/javascript">panelIndex=1;</script>';
+								echo '<div class="alert alert-success alert-dismissable">';
+								echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+								echo 'New meeting on '.$_GET["date"].' added!';
+								echo '</div>';
+							}
+							//$TitleID=mysqli_insert_id($con);
+					}
+					else{
+						global $MeetingID;
+						getNewMeetingID();
+						$sql="UPDATE tt_meeting SET `toastmaster`=".$_GET["toastmaster"].", `tableTopicsMaster`=".$_GET["tableTopicsMaster"].", `voteCounter`=".$_GET["voteCounter"].", `timer`=".$_GET["timer"].", `gramarian`=".$_GET["gramarian"].", `generalEvaluator`=".$_GET["generalEvaluator"].", `ahCounter`=".$_GET["ahCounter"]." WHERE `meeting_index`=".$MeetingID;
+							if (!mysqli_query($con,$sql)) {
+								die('Error: ' . mysqli_error($con));
+							}
+							else{
+							echo '<script type="text/javascript">panelIndex=1;</script>';
+								echo '<div class="alert alert-success alert-dismissable">';
+								echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+								echo 'Meeting '.$MeetingID.' updated!';
+								echo '</div>';
+							}						
+					}
+				}
+				else{
+					echo '<div class="alert alert-warning alert-dismissable">';
+					echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+					echo 'You have to be a member to edit meeting roles!';
+					echo '</div>';
+				}
 			}
 			
 			function CryptPass($passW){
@@ -810,14 +846,14 @@
 						$sp=0;
 						
 						if($MeetingID>0){
-							$sql="SELECT * FROM `toastmastersdb`.`tt_meeting`";
+							$sql="SELECT * FROM `toastmastersdb`.`tt_meeting` WHERE `meeting_index`=".$MeetingID;
 							$result =mysqli_query($con,$sql);
 							if (!$result) {
 								die('Error: ' . mysqli_error($con));
 							}
 							while($row = mysqli_fetch_array($result))
 							{		
-								$date=$row['date'];
+								$date=$row['date'];								
 								$com=$row['comment'];
 								$tm=$row['toastmaster'];
 								$tt=$row['tableTopicsMaster'];
@@ -837,7 +873,7 @@
 						echo '<input type="hidden" class="form-control" value="UpdateMeeting" name="page">';						
 						echo '<label for="date">Date : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input id="date" class="datepicker form-control" data-date-format="mm/dd/yyyy" name="date" value="'.$date.'" required';
+						echo '<input id="date" class="datepicker form-control" data-date-format="mm-dd-yyyy" name="date" value="'.$date.'" required';
 						if($mode>=1){
 							echo '>';
 						}
