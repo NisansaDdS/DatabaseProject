@@ -339,7 +339,7 @@
 							if($pass==$row['Password']){
 								$_SESSION['Name']=$row['Name'];
 								$_SESSION['Level']=$row['Level'];
-								$_SESSION['Index']=$row['Index'];
+								$_SESSION['Index']=intval ($row['Index']);
 								if($_POST["Redirect"]!=""){
 									$params = explode("page=Login&Next=",(string)$_POST["Redirect"]);
 									header( "Location: ./?page=".$params[1]);
@@ -753,19 +753,61 @@
 				
 			}
 			
+			function memberDropDown($selected){
+				global $MeetingID,$con; //Refer to the global variables			
+				
+				$sql="SELECT m.`Index`,m.`Name` FROM `toastmastersdb`.`tt_members` AS m";			
+				$options="";
+												
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+				while($row = mysqli_fetch_array($result))
+				{			
+					$value=intval($row['Index']);
+					if($MeetingID>0){ //Is update
+						if($selected==$_SESSION['Index'] || $selected==0) //This is a role you have volenteered  OR a role no one has volenteered
+						{
+							if($value==0 || $value==$_SESSION['Index']){ //Quiting, remaining OR Volenteering allowed 
+								$options=$options."<option value=".$value;
+								if($value==$selected){
+									$options=$options." selected='selected' ";
+								}
+								$options=$options.">".$row['Name']."</option>";
+							}
+						}						
+						else{ //Otherwise only that volnteered one shown. (You cannot forcefully remove others)
+							if($value==$selected){
+								$options="<option value=".$value." selected='selected' >".$row['Name']."</option>";
+							}
+						}					
+					}
+					else{ //Is add
+						$options=$options."<option value=".$value;
+						if($value==$selected){
+							$options=$options." selected='selected' ";
+						}
+						$options=$options.">".$row['Name']."</option>";	
+					}						
+				}	
+				
+				return $options;				
+			}
+			
 			function ShowMeetingtForm($mode){
 				global $MeetingID,$con; //Refer to the global variables
 
 						$date=date('m-j-Y');
 						$com="";
-						$tm="";
-						$tt="";
-						$vc="";
-						$ti="";
-						$gr="";
-						$ge="";
-						$ac="";
-						$sp="";
+						$tm=0;
+						$tt=0;
+						$vc=0;
+						$ti=0;
+						$gr=0;
+						$ge=0;
+						$ac=0;
+						$sp=0;
 						
 						if($MeetingID>0){
 							$sql="SELECT * FROM `toastmastersdb`.`tt_meeting`";
@@ -805,14 +847,21 @@
 						echo '</input></td><td td width="15%" ><div class="extra">';
 						echo '<br><label for="numberOfSpeechSlots">Speech Slots : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="numberOfSpeechSlots" name="numberOfSpeechSlots" value="'.$sp.'"';
+						echo '<select class="form-control" id="numberOfSpeechSlots" name="numberOfSpeechSlots" ';
 						if($mode>=1){
 							echo '>';
 						}
 						else{
 							echo ' disabled>';
 						}
-						echo '</td></tr><tr><td td width="15%"><div class="extra">';
+						for ($x = 3; $x <= 5; $x++) {
+							echo "<option value=".$x;
+							if($sp==$x){
+								echo " selected='selected' "; //Select the correct number
+							}
+							echo " >".$x."</option>";
+						}
+						echo '</select></td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="comment">Comments : </label></div>';
 						echo '</td><td td width="85%" colspan=3>';
 						echo '<textarea class="form-control" rows="4" id="comment" name="comment"';
@@ -828,31 +877,31 @@
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="toastmaster">Toastmaster : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="toastmaster" name="toastmaster" value="'.$tm.'">';
+						echo '<select class="form-control" id="toastmaster" name="toastmaster" >'.memberDropDown($tm).'</select>';
 						echo '</td><td td width="15%"><div class="extra">';
 						echo '<br><label for="tableTopicsMaster">TableTopics Master : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="tableTopicsMaster" name="tableTopicsMaster" value="'.$tt.'">';
+						echo '<select class="form-control" id="tableTopicsMaster" name="tableTopicsMaster" >'.memberDropDown($tt).'</select>';
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="voteCounter">Vote Counter : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="voteCounter" name="voteCounter" value="'.$vc.'">';
+						echo '<select class="form-control" id="voteCounter" name="voteCounter" >'.memberDropDown($vc).'</select>';
 						echo '</td><td td width="15%"><div class="extra">';
 						echo '<br><label for="timer">Timer : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="timer" name="timer" value="'.$tm.'">';
+						echo '<select class="form-control" id="timer" name="timer" >'.memberDropDown($ti).'</select>';
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="gramarian">Gramarian : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="gramarian" name="gramarian" value="'.$gr.'">';
+						echo '<select class="form-control" id="gramarian" name="gramarian" >'.memberDropDown($gr).'</select>';
 						echo '</td><td td width="15%"><div class="extra">';
 						echo '<br><label for="generalEvaluator">General Evaluator : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="generalEvaluator" name="generalEvaluator" value="'.$ge.'">';		
+						echo '<select type="text" class="form-control" id="generalEvaluator" name="generalEvaluator" >'.memberDropDown($ge).'</select>';		
 						echo '</td></tr><tr><td td width="15%"><div class="extra">';
 						echo '<br><label for="ahCounter">Ah Counter : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input type="text" class="form-control" id="ahCounter" name="ahCounter" value="'.$ac.'">';
+						echo '<select type="text" class="form-control" id="ahCounter" name="ahCounter" >'.memberDropDown($ac).'</select>';
 						echo '</td><td td width="15%">';
 						echo '<br>';
 						echo '</td><td td width="35%">';												
