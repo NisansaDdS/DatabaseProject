@@ -56,9 +56,7 @@
 			?>			
 			</li>
           </ul>
-          <form class="navbar-form navbar-right" action="." method="get">
-            <input id="searchBox" type="text" class="form-control" placeholder="Search..." name="q" >
-          </form>
+          
         </div>
       </div>
     </div>
@@ -387,15 +385,19 @@
 			else if($page=='Search'){
 				echo '<script type="text/javascript">panelIndex=0;</script>';
 				$sql="SELECT DISTINCT`tt_title`.`Topic`,`tt_title`.`Index` FROM tt_title,(SELECT `tt_title_to_key`.`Title` FROM tt_title_to_key,tt_key WHERE `tt_title_to_key`.`Key` =`tt_key`.`Index`";
-					
+
+				echo '<form  action="." method="get">';
+				echo '<input id="searchBox" type="text" class="form-control" placeholder="Search..." name="q" >';
+				echo '</form>';
+				
 				if (isset($_GET["q"]))
 				{
 					$q=$_GET["q"];
-					echo '<h2 class="sub-header">Search Results for "'.$q.'"</h2>';
+					echo '<h3 class="sub-header">Search Results for "'.$q.'"</h3>';
 					$sql=$sql."AND `tt_key`.`Key` = '".$q."'";
 				}
 				else{					
-					echo '<h2 class="sub-header">Listing All Topics</h2>';					
+					echo '<h3 class="sub-header">Listing All Topics</h3>';					
 				}
 				$sql=$sql.") AS Sel WHERE `Sel`.`Title` =`tt_title`.`Index`";
 							
@@ -405,14 +407,14 @@
 					die('Error: ' . mysqli_error($con));
 				}
 				
-				echo '<div class="title-container">';
+				//echo '<div class="title-container">';
 				echo '<div class="list-group">';
 				while($row = mysqli_fetch_array($result))
 				{					
 					echo '<a href="?page=Show&id='.$row['Index'].'" class="list-group-item" style:width="100%">'.$row['Topic'].'</a>';
 				}						
 				echo '</div>';
-				echo '</div>';
+				//echo '</div>';
 			}
 			else if($page=='Edit'){ //Ui for Edit				
 				if(isset($_SESSION['Level'])){					
