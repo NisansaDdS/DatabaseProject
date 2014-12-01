@@ -712,11 +712,6 @@
 			{
 				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Volenteer to be a speech evaluator</h2><br>';
-			}
-			else if($page=='Speech') //UI to Volenteer to do a speech
-			{
-				echo '<script type="text/javascript">panelIndex=2;</script>';
-				echo '<h2 class="sub-header">Volenteer to do a speech</h2><br>';
 				
 				global $MeetingID;
 				getNewMeetingID();
@@ -728,10 +723,52 @@
 				if (!$result) {
 					die('Error: ' . mysqli_error($con));
 				}
+					
+				echo '<table class="table table-hover">';
+				echo '<tr><th>Speaker</th><th>Manual</th><th>Project Number</th><th>Evaluator</th></tr>';
+				while($row = mysqli_fetch_array($result))
+				{
+					if(!is_null($row['evalIndex'])){ //If it is already claimed just print a line
+						echo '<tr>';
+						echo '<td>'.getMemberName(intval($row['memberIndex'])).'</td>';
+						echo '<td>'.$row['manualName'].'</td>';	
+						echo '<td>'.intval($row['projectNum']).'</td>';
+						echo '<td>'.getMemberName(intval($row['evalIndex'])).'</td>';	
+						echo '</tr>';
+					}
+					else{ //Else can claim					
+						echo '<tr>';
+						echo '<form action="." method="get">';
+						echo '<input type="hidden" class="form-control" value="ClaimEvaluatorSlot" name="page">';	
+						echo '<td>'.getMemberName(intval($row['memberIndex'])).'<input type="hidden" class="form-control" value='.intval($row['memberIndex']).' name="memberIndex"></td>';
+						echo '<td>'.$row['manualName'].'</td>';	
+						echo '<td>'.intval($row['projectNum']).'</td>';
+						echo '<td><button type="submit" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-ok-circle"></span> Evaluate</button> </td>';
+						echo '</form>';
+						echo '</tr>';
+					}
+				}
+				echo '</table>';
+				
+			}
+			else if($page=='Speech') //UI to Volenteer to do a speech
+			{
+				echo '<script type="text/javascript">panelIndex=2;</script>';
+				echo '<h2 class="sub-header">Volenteer to do a speech</h2><br>';
+				
+				global $MeetingID;
+				getNewMeetingID();
+				
+				$claimedCount=0;
+				$sql="SELECT * FROM `toastmastersdb`.`tt_speech` WHERE `meetingIndex`=".$MeetingID;	//Replace with Count(*)		
+																	
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
 								
 				while($row = mysqli_fetch_array($result))
-				{					
-					//$MeetingID=intval($row['m']);  //Check if perviously claimed!!!!
+				{	
 					$claimedCount++;
 				}
 				
@@ -779,6 +816,8 @@
 			{
 				echo '<script type="text/javascript">panelIndex=2;</script>';
 				echo '<h2 class="sub-header">Update member progress</h2><br>';
+				
+				
 			}
 			else if($page=='UpdateMeeting') //Business logic to add/update meeting
 			{
@@ -829,8 +868,8 @@
 				echo '<script type="text/javascript">panelIndex=2;</script>';
 				$sql="INSERT INTO tt_speech (`meetingIndex`,`memberIndex`,`manualName`,`projectNum`) VALUES (".$MeetingID.",".$_SESSION['Index'].",'".$_GET["manualName"]."',".intval ($_GET["projectNum"]).")";
 				if (!mysqli_query($con,$sql)) {
-					//die('Error: ' .mysqli_errno($con).' '. mysqli_error($con));
-					if(mysqli_errno($con)==1062)
+					
+					if(mysqli_errno($con)==1062) //If already exists 
 					{
 						echo '<div class="alert alert-warning alert-dismissable">';
 						echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
@@ -854,6 +893,22 @@
 				$hashed_password = crypt($key1,$key2);
 				$pass=crypt($passW, $hashed_password);
 				return $pass;
+			}
+			
+			function getMemberName($index){
+				global $con; //Refer to the global variables
+				
+				$sql="SELECT m.`Name` FROM `toastmastersdb`.`tt_members` AS m WHERE m.`Index`=".$index;			
+																	
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+				
+				if($row = mysqli_fetch_array($result))
+				{
+					return($row["Name"]);
+				}
 			}
 			
 			
