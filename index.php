@@ -741,7 +741,7 @@
 				echo '<tr><th>Speaker</th><th>Manual</th><th>Project Number</th><th>Evaluator</th></tr>';
 				while($row = mysqli_fetch_array($result))
 				{
-					if(!is_null($row['evalIndex'])){ //If it is already claimed just print a line
+					if(!is_null($row['evalIndex']) && $row['evalIndex']>0){ //If it is already claimed just print a line
 						echo '<tr>';
 						echo '<td>'.getMemberName(intval($row['memberIndex'])).'</td>';
 						echo '<td>'.$row['manualName'].'</td>';	
