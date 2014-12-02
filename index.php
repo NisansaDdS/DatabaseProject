@@ -243,7 +243,7 @@
 			?>
 			<a href="?page=Evaluator">Be an Evaluator!</a></li>
 			<?php
-				if($page=='Progress'){
+				if(($page=='Progress')||($page=='ProgressLoaded')){
 					echo "<li class='active'>";
 				}
 				else{
@@ -642,6 +642,19 @@
 									die('Error: ' . mysqli_error($con));
 								}
 								else{
+								
+									$keyID=mysqli_insert_id($con);
+									//Add the record for Comunication progress
+									$sql="INSERT INTO `tt_memberComunicationProgress` (`memIndex`) VALUES (".$keyID.");";
+									if (!mysqli_query($con,$sql)) {
+										die('Error: ' . mysqli_error($con));
+									}
+									//Add the record for Leadership progress
+									$sql="INSERT INTO `tt_memberLeadershipProgress` (`memIndex`) VALUES (".$keyID.");";
+									if (!mysqli_query($con,$sql)) {
+										die('Error: ' . mysqli_error($con));
+									}
+									
 									echo '<div class="alert alert-success alert-dismissable">';
 									echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
 									echo 'User '.$_POST["Name"].' added!';
@@ -812,12 +825,196 @@
 				}
 				
 			}
-			else if($page=='Progress') //UI to update member progress
+			else if($page=='Progress') //First UI to update member progress
 			{
-				echo '<script type="text/javascript">panelIndex=2;</script>';
-				echo '<h2 class="sub-header">Update member progress</h2><br>';
+				MemberLoadForm(0); 
+			}
+			else if($page=='ProgressLoaded')
+			{
+				$memberIndex=$_GET["member"];
+				MemberLoadForm($memberIndex);
+				
+				echo '<br>';
+				echo '<h3 class="sub-header">Progress update for '.getMemberName($memberIndex).'</h3><br>';				
+				echo '<h4 class="sub-header">Comunications Track (Speech status)</h4>';
+								
+				if(isset($_GET["yes"]) || isset($_GET["no"])) //Need to update speech status 
+				{
+					$sql="UPDATE tt_speech SET `completed`=";
+					if(isset($_GET["yes"])){
+						$sql=$sql."1";					
+					}
+					else{
+						$sql=$sql."0";
+					}
+					$sql=$sql." WHERE `meetingIndex`=".intval ($_GET[meetingIndex])." AND `memberIndex`=".$memberIndex;
+					if (!mysqli_query($con,$sql)) {
+						die('Error: ' . mysqli_error($con));
+					}					
+					else{
+
+						//Now update the comunication progress
+						$sql="SELECT * FROM `toastmastersdb`.`tt_memberComunicationProgress` WHERE memIndex=".$memberIndex;
+						$result=mysqli_query($con,$sql);
+						if (!$result) {
+							die('Error: ' . mysqli_error($con));
+						}
+					
+					
+						if($row = mysqli_fetch_array($result))
+						{
+							$currentProgress=intval ($row["GoalStatus"]);
+							$CC=intval ($row["CC"]);
+							$ACB=intval ($row["ACB"]);
+							$ACS=intval ($row["ACS"]);
+							$ACG=intval ($row["ACG"]);
+						}
+						$currentProgress++;
+						
+						if($currentProgress==10){
+							if($CC==0){
+								$CC=1;
+							}
+							else if($ACB==0){
+								$ACB=1;
+							}
+							else if($ACS==0){
+								$ACS=1;
+							}
+							else{
+								$ACG=1;
+							}
+							$currentProgress=0;
+						}
+												
+						$sql="UPDATE `toastmastersdb`.`tt_memberComunicationProgress` SET `GoalStatus`=".$currentProgress.", `CC`=".$CC.", `ACB`=".$ACB.", `ACS`=".$ACS.", `ACG`=".$ACG." WHERE `memIndex`=".$memberIndex;
+						if (!mysqli_query($con,$sql)) {
+							die('Error: ' . mysqli_error($con));
+						}
+						else{						
+							echo '<div class="alert alert-success alert-dismissable">';
+							echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+							echo 'Speech Credit added!';
+							echo '</div>';
+						}
+					}
+				}				
+				
+				$sql="SELECT m.`date`,s.`meetingIndex`,s.`manualName`,s.`projectNum`,mm.`Name` FROM `toastmastersdb`.`tt_speech` s JOIN `toastmastersdb`.`tt_meeting` m ON s.`meetingIndex`=m.`meeting_index` LEFT JOIN  `toastmastersdb`.`tt_members` mm ON s.`evalIndex`=mm.`Index` WHERE ISNULL(`completed`) AND `memberIndex`=".$memberIndex;
+																					
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+					
+				echo '<table class="table table-hover">';
+				echo '<tr><th>Date</th><th>Manual</th><th>Project Number</th><th>Evaluator</th><th>Response</th></tr>';
+				while($row = mysqli_fetch_array($result))
+				{
+					echo '<tr><form action="." method="get">';
+					echo '<input type="hidden" class="form-control" value="ProgressLoaded" name="page">'; //Need to loop back to the same page
+					echo '<input type="hidden" class="form-control" value='.$memberIndex.' name="member">';	
+					echo '<input type="hidden" class="form-control" value='.$row['meetingIndex'].' name="meetingIndex">';	
+					echo '<td>'.$row['date'].'</td><td>'.$row['manualName'].'</td><td>'.$row['projectNum'].'</td><td>'.$row['Name'].'</td><td>';
+					echo '<button type="submit" class="btn btn-success btn-xs" name="yes"><span class="glyphicon glyphicon-ok-circle"></span> Completed</button> ';
+					echo '<button type="submit" class="btn btn-danger btn-xs" name="no"><span class="glyphicon glyphicon-remove-circle"></span> Missed</button> ';
+					echo '</td></form></tr>';				
+				}
+				echo '</table><br>';
+				
+				echo '<h4 class="sub-header">Leadership Track</h4>';
+				
+				if(isset($_GET["CL"])) //Need to update leadership status 
+				{
+					$currentProgress=intval ($_GET["currentProgress"]);
+					$CL=intval ($_GET["CL"]);
+					$ALB=intval ($_GET["ALB"]);
+					$ALS=intval ($_GET["ALS"]);
+					$DTM=intval ($_GET["DTM"]);
+					
+					$sql="UPDATE `toastmastersdb`.`tt_memberLeadershipProgress` SET `GoalStatus`=".$currentProgress.", `CL`=".$CL.", `ALB`=".$ALB.", `ALS`=".$ALS.", `DTM`=".$DTM." WHERE `memIndex`=".$memberIndex;
+					if (!mysqli_query($con,$sql)) {
+						die('Error: ' . mysqli_error($con));
+					}
+					else{						
+						echo '<div class="alert alert-success alert-dismissable">';
+						echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+						echo 'Leadership Credit added!';
+						echo '</div>';
+					}
+					
+				}
 				
 				
+							
+				$sql="SELECT * FROM `toastmastersdb`.`tt_memberLeadershipProgress` WHERE memIndex=".$memberIndex;
+				$result=mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+					
+					
+				if($row = mysqli_fetch_array($result))
+				{
+					$currentProgress=intval ($row["GoalStatus"]);
+					$CL=intval ($row["CL"]);
+					$ALB=intval ($row["ALB"]);
+					$ALS=intval ($row["ALS"]);
+					$DTM=intval ($row["DTM"]);
+				}
+				$currentProgress++;
+				$CurrentGoalName="";
+				
+				
+				
+					if($CL==0){
+						$CurrentGoalName="CL manual";						
+					}
+					else if($ALB==0){
+						$CurrentGoalName="ALB";						
+					}
+					else if($ALS==0){
+						$CurrentGoalName="ALS";						
+					}
+					else{
+						$CurrentGoalName="DTM";						
+					}	
+				
+				if($currentProgress==11){
+					if($CL==0){						
+						$CL=1;
+						$CurrentGoalName="ALB";
+					}
+					else if($ALB==0){						
+						$ALB=1;
+						$CurrentGoalName="ALS";	
+					}
+					else if($ALS==0){						
+						$ALS=1;
+						$CurrentGoalName="DTM";	
+					}
+					else{						
+						$DTM=1;
+					}
+					$currentProgress=1;
+				}
+
+				echo '<form action="." method="get">';
+				echo '<input type="hidden" class="form-control" value="ProgressLoaded" name="page">'; //Need to loop back to the same page
+				echo '<input type="hidden" class="form-control" value='.$memberIndex.' name="member">';	
+				echo '<input type="hidden" class="form-control" value='.$CL.' name="CL">';
+				echo '<input type="hidden" class="form-control" value='.$ALB.' name="ALB">';
+				echo '<input type="hidden" class="form-control" value='.$ALS.' name="ALS">';
+				echo '<input type="hidden" class="form-control" value='.$DTM.' name="DTM">';
+				echo '<input type="hidden" class="form-control" value='.$currentProgress.' name="currentProgress">';
+				echo '<table width="100%" border="0" ><tr><td width="65%" ><div class="extra">';
+				echo 'Has the member successfully completed the project number '.$currentProgress.' for '.$CurrentGoalName.'? </div>';
+				echo '</td><td td width="35%"><div class="extra">';	
+				echo '<button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-ok-circle"></span> Yes!</button>';	
+				echo '</div></td></tr>';
+				echo '</table>';	
+					
+			
 			}
 			else if($page=='UpdateMeeting') //Business logic to add/update meeting
 			{
@@ -903,6 +1100,8 @@
 				}
 			}
 			
+			
+			
 			function CryptPass($passW){
 				global $key1,$key2;
 				$hashed_password = crypt($key1,$key2);
@@ -926,6 +1125,18 @@
 				}
 			}
 			
+			function MemberLoadForm($selected){
+				echo '<script type="text/javascript">panelIndex=2;</script>';
+				echo '<h2 class="sub-header">Update member progress</h2><br>';
+				echo '<form action="." method="get">';
+				echo '<table width="100%" border="0" ><tr><td width="15%" ><div class="extra">';
+				echo '<input type="hidden" class="form-control" value="ProgressLoaded" name="page">';						
+				echo '<label for="member">Member : </label></div>';
+				echo '</td><td td width="75%">';				
+				echo '<select class="form-control" id="member" name="member">'.remainingMemberDropDown($selected).'</select>';
+				echo '</td><td width="10%"><div class="extra"><button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-ok-circle"></span> View Pending Projects</button></div>';	
+				echo '</td></tr></table></form>';
+			}
 			
 			function getNewMeetingID(){
 				global $MeetingID,$con; //Refer to the global variables
@@ -944,6 +1155,30 @@
 				
 				
 			}
+			
+			function remainingMemberDropDown($selected){
+				global $con; //Refer to the global variables
+				$sql="SELECT m.`Index`,m.`Name` FROM `toastmastersdb`.`tt_members` AS m WHERE m.`Index`<>".$_SESSION['Index'];
+				$options="";
+												
+				$result =mysqli_query($con,$sql);
+				if (!$result) {
+					die('Error: ' . mysqli_error($con));
+				}
+				while($row = mysqli_fetch_array($result))
+				{	
+					$value=intval($row['Index']);
+					if($value<>0){
+						$options=$options."<option value=".$value;
+						if($value==$selected){
+							$options=$options." selected='selected' ";
+						}
+						$options=$options.">".$row['Name']."</option>";
+					}
+				}
+				return $options;
+			}
+			
 			
 			function memberDropDown($selected){
 				global $MeetingID,$con; //Refer to the global variables			
