@@ -358,6 +358,7 @@
 				if(isset($_SESSION['Name'])){
 						unset($_SESSION['Name']);
 						unset($_SESSION['Level']);
+						unset($_SESSION['Index']);
 				}
 				header( "Location: ./?page=Random");
 			}
