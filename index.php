@@ -40,11 +40,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Table Topics Manager</a>
+          <a class="navbar-brand" href="#">Toastmasters Club Manager</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">University of Moratuwa Toastmasters Club</a></li>            
+            <li><a href="#">UO Toastmasters Club</a></li>            
             <li>
 			<?php 				
 				if(isset($_SESSION['Name'])){
@@ -285,14 +285,8 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <?php
 		
-			
-			
-				
-			
 			include('connectionData.php');
-
-			
-
+	
 			$con=mysqli_connect($server, $user, $pass, $dbname, $port);
 
 			if (mysqli_connect_errno()) {
@@ -301,7 +295,7 @@
 									
 			$topics =array();
 			LoadAllTopics();
-			//echo $topics[2];
+			
 			
 			$TitleID=0;
 			$Title="";
@@ -677,8 +671,11 @@
 									if (!mysqli_query($con,$sql)) {
 										die('Error: ' . mysqli_error($con));
 									}
+									
+									//************Following part was replaced with a DB Trigger!!!*****************************************************
+									
 									//	$keyID=mysqli_insert_id($con);
-										//Add the record for Comunication progress ************Trigger!!!*****************************************************
+										//Add the record for Comunication progress 
 									//	$sql="INSERT INTO `tt_memberComunicationProgress` (`memIndex`) VALUES (".$keyID.");";
 										//if (!mysqli_query($con,$sql)) {
 									//		die('Error: ' . mysqli_error($con));
@@ -688,6 +685,8 @@
 										//if (!mysqli_query($con,$sql)) {
 										//	die('Error: ' . mysqli_error($con));
 										//}
+										
+										//************Above part was replaced with a DB Trigger!!!*****************************************************
 										
 										echo '<div class="alert alert-success alert-dismissable">';
 										echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
@@ -785,7 +784,7 @@
 							echo '<td>'.getMemberName(intval($row['evalIndex'])).'</td>';	
 							echo '</tr>';
 						}
-						else{ //Else can claim					
+						else{ //Else, can claim					
 							echo '<tr>';
 							echo '<form action="." method="get">';
 							echo '<input type="hidden" class="form-control" value="ClaimEvaluatorSlot" name="page">';	
@@ -870,7 +869,7 @@
 					header( "Location: ./?page=Login&Next=".$params[1]);
 				}
 			}
-			else if($page=='Progress') //First UI to update member progress
+			else if($page=='Progress') //Basic UI to update member progress
 			{
 				if(isset($_SESSION['Level'])){
 					MemberLoadForm(0); 
@@ -880,7 +879,7 @@
 					header( "Location: ./?page=Login&Next=".$params[1]);
 				}	
 			}
-			else if($page=='ProgressLoaded')
+			else if($page=='ProgressLoaded') //Expanded UI to update member progress
 			{
 				if(isset($_SESSION['Level'])){	
 					$memberIndex=$_GET["member"];
@@ -982,7 +981,7 @@
 						
 						echo '<h4 class="sub-header">Leadership Track</h4>';
 						
-						if(isset($_GET["CL"])) //Need to update leadership status 
+						if(isset($_GET["CL"])) //Code to update leadership status 
 						{
 							$currentProgress=intval ($_GET["currentProgress"]);
 							$CL=intval ($_GET["CL"]);
