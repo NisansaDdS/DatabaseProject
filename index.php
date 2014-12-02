@@ -232,7 +232,13 @@
 					echo "<li>";
 				}				
 			?>
-			<a href="?page=Speech">Do a Speech!</a></li>
+			<a href="?page=Speech">Do a Speech!
+			<?php
+				if(!isset($_SESSION['Name'])){
+					echo '<span class="glyphicon glyphicon-lock"></span>';
+				}
+			?>
+			</a></li>
 			<?php
 				if($page=='Evaluator'){
 					echo "<li class='active'>";
@@ -241,7 +247,13 @@
 					echo "<li>";
 				}				
 			?>
-			<a href="?page=Evaluator">Be an Evaluator!</a></li>
+			<a href="?page=Evaluator">Be an Evaluator!
+			<?php
+				if(!isset($_SESSION['Name'])){
+					echo '<span class="glyphicon glyphicon-lock"></span>';
+				}
+			?>
+			</a></li>
 			<?php
 				if(($page=='Progress')||($page=='ProgressLoaded')){
 					echo "<li class='active'>";
