@@ -1,5 +1,6 @@
 <?php session_start(); ?>
 <head>
+<!-- Nisansa Dilushan de Silva -->
 
 <!-- Bootstrap core CSS -->
     <link href="./bootstrap-3.1.1-dist/css/bootstrap.css" rel="stylesheet">
@@ -320,8 +321,13 @@
 				if(isset($_GET["Wrong"])){
 					echo 'value='.$_GET["email"];
 				}
+				else{
+					echo 'value="cwilson@cs.uoregon.edu" '; //This section should be removed in the future expansions. This is given only for grading purposes
+				}
 				echo 'required autofocus>';
-				echo '<input type="password" class="form-control" placeholder="Password" name="password" required>';
+				echo '<input type="password" class="form-control" placeholder="Password" name="password" ';
+				echo ' value="Chirs" ';  //This line should be removed in the future expansions. This is given only for grading purposes
+				echo ' required>';
 				echo '<label class="checkbox">';
 				echo '<input type="checkbox" value="remember-me"> Remember me';
 				echo '</label>';
@@ -477,7 +483,15 @@
 						if (!mysqli_query($con,$sql)) {
 							die('Error: ' . mysqli_error($con));
 						}
-						else{						
+						else{	
+
+
+							$sql="SET FOREIGN_KEY_CHECKS = 0;"; //Disable Foreign key checks for this transaction because we would need to go through an inconsitant state
+							if (!mysqli_query($con,$sql)) {
+								die('Error: ' . mysqli_error($con));
+							}
+
+						
 							ExtractDBwriterInput();
 							$isAdd=true;
 							
@@ -562,6 +576,13 @@
 								}						
 							}
 							
+							
+							$sql="SET FOREIGN_KEY_CHECKS = 1;"; //Restore Foreign key checks 
+							if (!mysqli_query($con,$sql)) {
+								die('Error: ' . mysqli_error($con));
+							}
+							
+							
 							$sql="COMMIT;";
 							if (!mysqli_query($con,$sql)) {
 								die('Error: ' . mysqli_error($con));
@@ -610,7 +631,7 @@
 						}
 						echo 'required autofocus>';
 						echo '<h4>Email address (Used to login)</h4>';
-						echo '<input type="text" class="form-control" placeholder="Email address" name="Email" ';
+						echo '<input type="email" class="form-control" placeholder="Email address" name="Email" ';
 						if(isset($_GET["Email"])){
 							echo 'value ="'.$_GET["Email"].'"';
 						}
@@ -755,11 +776,11 @@
 					header( "Location: ./?page=Login&Next=".$params[1]);
 				}
 			}
-			else if($page=='Evaluator') //UI to Volenteer for a speech evaluator
+			else if($page=='Evaluator') //UI to Volunteer for a speech evaluator
 			{
 				if(isset($_SESSION['Level'])){				
 					echo '<script type="text/javascript">panelIndex=2;</script>';
-					echo '<h2 class="sub-header">Volenteer to be a speech evaluator</h2><br>';
+					echo '<h2 class="sub-header">Volunteer to be a speech evaluator</h2><br>';
 					
 					global $MeetingID;
 					getNewMeetingID();
@@ -803,11 +824,11 @@
 					header( "Location: ./?page=Login&Next=".$params[1]);
 				}
 			}
-			else if($page=='Speech') //UI to Volenteer to do a speech
+			else if($page=='Speech') //UI to Volunteer to do a speech
 			{
 				if(isset($_SESSION['Level'])){	
 					echo '<script type="text/javascript">panelIndex=2;</script>';
-					echo '<h2 class="sub-header">Volenteer to do a speech</h2><br>';
+					echo '<h2 class="sub-header">Volunteer to do a speech</h2><br>';
 					
 					global $MeetingID;
 					getNewMeetingID();
@@ -948,11 +969,19 @@
 								if (!mysqli_query($con,$sql)) {
 									die('Error: ' . mysqli_error($con));
 								}
-								else{						
-									echo '<div class="alert alert-success alert-dismissable">';
-									echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-									echo 'Speech Credit added!';
-									echo '</div>';
+								else{
+									if(isset($_GET["yes"])){
+										echo '<div class="alert alert-success alert-dismissable">';
+										echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+										echo 'Speech Credit added!';
+										echo '</div>';
+									}
+									else{
+										echo '<div class="alert alert-warning alert-dismissable">';
+										echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+										echo 'Speech Credit NOT added!';
+										echo '</div>';
+									}
 								}
 							}
 						}				
@@ -1092,7 +1121,7 @@
 								die('Error: ' . mysqli_error($con));
 							}
 							else{
-								$sql="INSERT INTO tt_meeting (`date`,`comment`,`toastmaster`,`tableTopicsMaster`,`voteCounter`,`timer`,`gramarian`,`generalEvaluator`,`ahCounter`,`numberOfSpeechSlots`) VALUES (STR_TO_DATE('".$_GET["date"]."', '%m-%d-%Y'),'".$_GET["comment"]."',".$_GET["toastmaster"].",".$_GET["tableTopicsMaster"].",".$_GET["voteCounter"].",".$_GET["timer"].",".$_GET["gramarian"].",".$_GET["generalEvaluator"].",".$_GET["ahCounter"].",".$_GET["numberOfSpeechSlots"].")";
+								$sql="INSERT INTO tt_meeting (`date`,`comment`,`toastmaster`,`tableTopicsMaster`,`voteCounter`,`timer`,`gramarian`,`generalEvaluator`,`ahCounter`,`numberOfSpeechSlots`) VALUES (STR_TO_DATE('".$_GET["date"]."', '%m/%d/%Y'),'".$_GET["comment"]."',".$_GET["toastmaster"].",".$_GET["tableTopicsMaster"].",".$_GET["voteCounter"].",".$_GET["timer"].",".$_GET["gramarian"].",".$_GET["generalEvaluator"].",".$_GET["ahCounter"].",".$_GET["numberOfSpeechSlots"].")";
 								if (!mysqli_query($con,$sql)) {
 									die('Error: ' . mysqli_error($con));
 								}
@@ -1318,9 +1347,9 @@
 				{			
 					$value=intval($row['Index']);
 					if($MeetingID>0){ //Is update
-						if($selected==$_SESSION['Index'] || $selected==0) //This is a role you have volenteered  OR a role no one has volenteered
+						if($selected==$_SESSION['Index'] || $selected==0) //This is a role you have Volunteered  OR a role no one has Volunteered
 						{
-							if($value==0 || $value==$_SESSION['Index']){ //Quiting, remaining OR Volenteering allowed 
+							if($value==0 || $value==$_SESSION['Index']){ //Quiting, remaining OR Volunteering allowed 
 								$options=$options."<option value=".$value;
 								if($value==$selected){
 									$options=$options." selected='selected' ";
@@ -1388,7 +1417,7 @@
 						echo '<input type="hidden" class="form-control" value="UpdateMeeting" name="page">';						
 						echo '<label for="date">Date : </label></div>';
 						echo '</td><td td width="35%">';
-						echo '<input id="date" class="datepicker form-control" data-date-format="mm-dd-yyyy" name="date" value="'.$date.'" required';
+						echo '<input id="date" class="datepicker form-control" data-date-format="mm/dd/yyyy" name="date" value="'.$date.'" required';
 						if($mode>=1){
 							echo '>';
 						}
