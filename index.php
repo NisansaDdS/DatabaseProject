@@ -355,7 +355,7 @@
 									header( "Location: ./?page=".$params[1]);
 								}
 								else{
-									header( "Location: ./?page=Random"); //Does not work/////////////////////////////////////////////////////////////////
+									header( "Location: ./?page=Random"); 
 								}								
 							}
 							else{
@@ -693,19 +693,23 @@
 										die('Error: ' . mysqli_error($con));
 									}
 									
-									//************Following part was replaced with a DB Trigger!!!*****************************************************
+										//************Following part was replaced with a DB Trigger!!!*****************************************************
 									
-									//	$keyID=mysqli_insert_id($con);
+										/*	
+										
+										$keyID=mysqli_insert_id($con);
 										//Add the record for Comunication progress 
-									//	$sql="INSERT INTO `tt_memberComunicationProgress` (`memIndex`) VALUES (".$keyID.");";
-										//if (!mysqli_query($con,$sql)) {
-									//		die('Error: ' . mysqli_error($con));
-									//	}
+										$sql="INSERT INTO `tt_memberComunicationProgress` (`memIndex`) VALUES (".$keyID.");";
+										if (!mysqli_query($con,$sql)) {
+											die('Error: ' . mysqli_error($con));
+										}
 										//Add the record for Leadership progress
-										//$sql="INSERT INTO `tt_memberLeadershipProgress` (`memIndex`) VALUES (".$keyID.");";
-										//if (!mysqli_query($con,$sql)) {
-										//	die('Error: ' . mysqli_error($con));
-										//}
+										$sql="INSERT INTO `tt_memberLeadershipProgress` (`memIndex`) VALUES (".$keyID.");";
+										if (!mysqli_query($con,$sql)) {
+											die('Error: ' . mysqli_error($con));
+										}
+										
+										*/
 										
 										//************Above part was replaced with a DB Trigger!!!*****************************************************
 										
