@@ -397,7 +397,7 @@
 			}
 			else if($page=='Search'){
 				echo '<script type="text/javascript">panelIndex=0;</script>';
-				$sql="SELECT DISTINCT`tt_title`.`Topic`,`tt_title`.`Index` FROM tt_title,(SELECT `tt_title_to_key`.`Title` FROM tt_title_to_key,tt_key WHERE `tt_title_to_key`.`Key` =`tt_key`.`Index`";
+				$sql="SELECT DISTINCT`tt_title`.`Topic`,`tt_title`.`Index` FROM tt_title JOIN(SELECT `tt_title_to_key`.`Title` FROM tt_title_to_key,tt_key WHERE `tt_title_to_key`.`Key` =`tt_key`.`Index`";
 
 				echo '<form  action="." method="get">';
 				echo '<input id="searchBox" type="text" class="form-control" placeholder="Search..." name="q" >';
@@ -412,7 +412,7 @@
 				else{					
 					echo '<h3 class="sub-header">Listing All Topics</h3>';					
 				}
-				$sql=$sql.") AS Sel WHERE `Sel`.`Title` =`tt_title`.`Index`";
+				$sql=$sql.") AS Sel ON `Sel`.`Title` =`tt_title`.`Index`";
 							
 				
 				$result =mysqli_query($con,$sql);
